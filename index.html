@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사회정서역량 진단 설문</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1729; --surface:#161f35; --line:#1e2d4a; --line-soft:#0f1729;
+    --text:#f0f4ff; --muted:#8896b3; --dim:#5a6a8a;
+    --accent:#64d2ff; --warn:#fb923c; --good:#34d399;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Noto Sans KR',system-ui,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh; line-height:1.6;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 16px 64px}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  input,select{font-family:inherit}
+  .hidden{display:none !important}
+
+  /* 모드 전환 */
+  .modes{display:flex;justify-content:center;gap:8px;margin-bottom:28px}
+  .mode-btn{padding:9px 18px;border-radius:10px;font-size:14px;font-weight:700;
+    background:var(--line);color:var(--accent);border:1px solid var(--line);transition:background .15s,color .15s}
+  .mode-btn[aria-selected="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+
+  h1{font-size:clamp(22px,4vw,30px);font-weight:900;letter-spacing:-.02em;line-height:1.25}
+  h2{font-size:20px;font-weight:700}
+  .sub{font-size:13px;color:var(--dim)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px}
+
+  /* 설문 */
+  .intro{max-width:640px;margin:0 auto 24px;text-align:center}
+  .namebox{max-width:420px;margin:18px auto 14px;padding:16px;text-align:left}
+  .namebox label{display:block;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px}
+  .namebox input{width:100%;padding:10px 12px;border-radius:9px;font-size:15px;
+    background:var(--bg);color:var(--text);border:1px solid var(--line)}
+  .namebox input::placeholder{color:#4a5a7a}
+  .progress{position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 0 12px;margin-bottom:18px}
+  .progress-bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+  .progress-fill{height:100%;width:0;background:var(--accent);transition:width .25s ease}
+  .progress-text{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+
+  .survey{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+  .section-head{display:flex;align-items:center;gap:10px;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+  .section-head .emoji{font-size:24px;line-height:1}
+  .section-head h3{font-size:16px;font-weight:700}
+  .q{padding:14px 0;border-bottom:1px solid var(--line-soft)}
+  .q:last-child{border-bottom:none;padding-bottom:0}
+  .q p{font-size:14.5px;font-weight:500;margin-bottom:10px}
+  .q .num{font-weight:700}
+  .scale{display:flex;gap:6px}
+  .score-btn{flex:1;padding:9px 0;border-radius:9px;font-size:13px;font-weight:700;
+    background:var(--bg);color:var(--muted);border:1px solid var(--line);transition:transform .1s}
+  .score-btn:active{transform:scale(.95)}
+  .score-btn[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+  .scale-legend{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:6px}
+  .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:28px}
+  .btn{padding:10px 20px;border-radius:10px;font-size:14px;font-weight:700;
+    background:var(--line);color:var(--accent);border:1px solid var(--accent)}
+  .btn-primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+  .btn-quiet{border-color:var(--line);color:var(--muted)}
+
+  /* 결과 */
+  .result-top{text-align:center;margin-bottom:24px}
+  .result-top .who{font-size:13px;letter-spacing:.15em;color:var(--accent);margin-bottom:4px}
+  .result-grid{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+  .result-chart{flex:1 1 380px;padding:16px}
+  .result-side{flex:1 1 280px;display:flex;flex-direction:column;gap:12px}
+  .stat-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .stat-row:last-child{margin-bottom:0}
+  .dscore{padding:12px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+  .dscore-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .dscore-head span:first-child{font-size:12.5px;font-weight:700}
+  .dscore-head span:last-child{font-size:14px;font-weight:700;color:var(--text)}
+  .track{background:var(--bg);height:6px;border-radius:3px;overflow:hidden}
+  .track > div{height:100%;transition:width .6s ease}
+  .note{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.7}
+
+  /* 교사 */
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+  .kpi{padding:14px 16px}
+  .kpi .n{font-size:24px;font-weight:900;color:var(--accent)}
+  .kpi .l{font-size:12px;color:var(--muted)}
+  .students{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .student-card{padding:14px;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:14px;transition:border-color .15s}
+  .student-card:hover{border-color:var(--accent)}
+  .student-card h3{font-size:16px;font-weight:700}
+  .mini{display:flex;justify-content:space-between;font-size:12px;margin-top:3px}
+  .empty{text-align:center;padding:48px 16px;color:var(--muted)}
+  .warn-banner{padding:12px 14px;border-radius:12px;background:rgba(251,146,60,.1);
+    border:1px solid rgba(251,146,60,.4);color:#ffd0a8;font-size:12.5px;margin-bottom:18px}
+  .qrow{padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line);font-size:12.5px}
+  .qrow:last-child{border-bottom:none}
+  .chip{display:inline-block;padding:1px 8px;border-radius:5px;font-size:11px;font-weight:700;color:var(--bg)}
+  .detail-grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:900px){.detail-grid{grid-template-columns:1fr 1fr}}
+  .inner{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .scroll{max-height:320px;overflow-y:auto;padding-right:4px}
+
+  .toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:99;
+    padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;background:var(--warn);color:var(--bg)}
+
+  @media print{
+    body{background:#fff;color:#111}
+    .modes,.actions,.toolbar,.progress{display:none !important}
+    .card,.dscore,.inner{border-color:#ccc}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="modes" role="tablist">
+    <button id="studentModeBtn" class="mode-btn" role="tab" aria-selected="true">학생용 설문</button>
+    <button id="teacherModeBtn" class="mode-btn" role="tab" aria-selected="false">교사용 결과 보기</button>
+  </div>
+
+  <!-- ===== 학생: 설문 ===== -->
+  <section id="surveyView">
+    <div class="intro">
+      <h1 id="surveyTitle">사회정서역량 진단 설문</h1>
+      <div class="card namebox">
+        <label for="studentNameInput">이름 (또는 학번)</label>
+        <input id="studentNameInput" type="text" placeholder="예: 3학년 2반 김하늘" autocomplete="off">
+      </div>
+      <p class="sub">20개 문항을 읽고 자신에게 해당하는 정도를 1~5 중에서 고르세요. 정답은 없습니다.</p>
+    </div>
+
+    <div class="progress">
+      <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+      <p id="progressText" class="progress-text">0 / 20 문항 응답</p>
+    </div>
+
+    <div id="surveyContainer" class="survey"></div>
+
+    <div class="actions">
+      <button id="resetBtn" class="btn btn-quiet">처음부터 다시</button>
+      <button id="submitBtn" class="btn btn-primary">결과 보기</button>
+    </div>
+  </section>
+
+  <!-- ===== 학생: 결과 ===== -->
+  <section id="chartView" class="hidden">
+    <div class="result-top">
+      <p id="studentNameResult" class="who"></p>
+      <h1>사회정서역량 프로파일</h1>
+      <p class="sub">5개 영역을 10점 만점으로 환산한 결과입니다.</p>
+    </div>
+
+    <div class="result-grid">
+      <div class="card result-chart">
+        <svg id="spiderSvg" viewBox="0 0 500 470" class="chart" style="width:100%;max-height:470px"></svg>
+      </div>
+      <div class="result-side">
+        <div class="card" style="padding:14px">
+          <div class="stat-row"><span>평균 점수</span><strong id="avgScore" style="color:var(--accent)">-</strong></div>
+          <div class="stat-row"><span>가장 높은 영역</span><strong id="strengthArea" style="color:var(--good)">-</strong></div>
+          <div class="stat-row"><span>더 키우면 좋을 영역</span><strong id="weakArea" style="color:var(--warn)">-</strong></div>
+          <p id="resultNote" class="note"></p>
+        </div>
+        <div id="domainScores" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="saveFileBtn" class="btn">내 결과 파일로 저장</button>
+      <button id="printBtn" class="btn">인쇄 / PDF 저장</button>
+      <button id="backBtn" class="btn btn-quiet">설문 다시 하기</button>
+    </div>
+  </section>
+
+  <!-- ===== 교사 ===== -->
+  <section id="teacherView" class="hidden">
+    <div class="intro" style="max-width:720px">
+      <h1>학급 결과 보기</h1>
+      <p class="sub" style="margin-top:8px">이 브라우저에서 제출된 결과가 모두 표시됩니다. 학생 카드를 누르면 문항별 응답까지 볼 수 있습니다.</p>
+    </div>
+
+    <div id="storageWarn" class="warn-banner hidden"></div>
+
+    <div id="teacherMain">
+      <div id="teacherSummary" class="summary-grid"></div>
+
+      <div class="toolbar">
+        <button id="exportCsvBtn" class="btn">엑셀(CSV) 내려받기</button>
+        <button id="exportJsonBtn" class="btn">백업 파일 저장</button>
+        <button id="importBtn" class="btn">학생 결과 파일 불러오기</button>
+        <button id="clearBtn" class="btn btn-quiet">전체 삭제</button>
+        <input id="importInput" type="file" accept=".json,application/json" multiple class="hidden">
+      </div>
+
+      <div id="studentsList" class="students"></div>
+      <div id="emptyTeacher" class="empty">
+        <p style="font-size:16px">아직 제출된 결과가 없습니다.</p>
+        <p class="sub" style="margin-top:6px">학생용 설문에서 결과를 제출하거나, 학생이 저장한 결과 파일을 불러오세요.</p>
+      </div>
+    </div>
+
+    <div id="studentDetail" class="hidden">
+      <div class="toolbar" style="justify-content:flex-start">
+        <button id="backToListBtn" class="btn btn-quiet">목록으로</button>
+        <button id="deleteOneBtn" class="btn btn-quiet">이 학생 결과 삭제</button>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+                    padding-bottom:14px;margin-bottom:18px;border-bottom:1px solid var(--line)">
+          <h2 id="detailStudentName"></h2>
+          <span id="detailDate" class="sub"></span>
+        </div>
+        <div class="detail-grid">
+          <div class="inner">
+            <svg id="detailSpiderSvg" viewBox="0 0 500 470" style="width:100%;max-height:420px"></svg>
+            <p class="sub" style="text-align:center;margin-top:6px">채워진 도형: 학생 &nbsp;·&nbsp; 점선: 학급 평균</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="inner">
+              <h3 style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px">영역별 점수</h3>
+              <div id="detailDomainScores" style="display:flex;flex-direction:column;gap:8px"></div>
+            </div>
+            <div class="inner">
+              <h3 style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px">문항별 응답</h3>
+              <div id="detailQuestionsContent" class="scroll"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* =========================================================
+   1. 설정 — 이 부분만 고쳐도 설문 내용이 바뀝니다
+   ========================================================= */
+const STORAGE_KEY = 'sel-survey-records-v1';
+
+const domains = [
+  { key:'self_aware',   label:'자기 인식',     short:'자기인식', icon:'🪞', color:'#60a5fa' },
+  { key:'self_mgmt',    label:'자기 관리',     short:'자기관리', icon:'🧘', color:'#a78bfa' },
+  { key:'social_aware', label:'사회적 인식',   short:'사회인식', icon:'🌍', color:'#fbbf24' },
+  { key:'relationship', label:'관계 기술',     short:'관계기술', icon:'🤝', color:'#34d399' },
+  { key:'decision',     label:'책임 있는 결정', short:'책임결정', icon:'⚖️', color:'#f472b6' }
+];
+
+const questions = [
+  { domain:'self_aware', text:'나는 내가 지금 어떤 기분인지, 왜 그런 기분이 드는지 잘 안다.' },
+  { domain:'self_aware', text:'나는 나의 장점과 더 노력해야 할 점이 무엇인지 구체적으로 알고 있다.' },
+  { domain:'self_aware', text:'나는 어려운 과제를 만났을 때도 \u2018나도 할 수 있다\u2019는 자신감을 갖는다.' },
+  { domain:'self_aware', text:'나는 나의 생각과 감정이 나의 행동에 어떤 영향을 주는지 이해한다.' },
+  { domain:'self_mgmt', text:'나는 화가 나거나 짜증이 나는 상황에서도 감정을 적절히 조절할 수 있다.' },
+  { domain:'self_mgmt', text:'나는 수업 준비물이나 과제 제출 기한을 스스로 챙기고 잘 지킨다.' },
+  { domain:'self_mgmt', text:'나는 목표를 달성하기 위해 어려운 점이 있어도 끝까지 참고 노력한다.' },
+  { domain:'self_mgmt', text:'나는 수업 시간에 스마트 기기나 다른 일에 한눈팔지 않고 집중하려 노력한다.' },
+  { domain:'social_aware', text:'나는 친구의 입장이나 기분이 어떠할지 입장을 바꿔서 생각해보려 한다.' },
+  { domain:'social_aware', text:'나는 나와 생각이나 배경(문화, 언어 등)이 다른 친구의 의견을 존중한다.' },
+  { domain:'social_aware', text:'나는 우리 반이나 학교에서 지켜야 할 규칙과 예절이 왜 중요한지 안다.' },
+  { domain:'social_aware', text:'나는 도움이 필요한 친구를 보면 먼저 다가가 도와주려는 마음을 갖고 있다.' },
+  { domain:'relationship', text:'나는 모둠 활동에서 친구들과 의견이 달라도 사이좋게 협력한다.' },
+  { domain:'relationship', text:'나는 친구나 선생님에게 나의 생각과 요구를 명확하고 정중하게 표현한다.' },
+  { domain:'relationship', text:'나는 친구와 갈등이 생겼을 때 다투기보다 대화로 문제를 해결하려 노력한다.' },
+  { domain:'relationship', text:'나는 온라인(SNS, 채팅 등)에서도 상대방을 존중하며 예절 바르게 소통한다.' },
+  { domain:'decision', text:'나는 행동하기 전에 내 행동이 다른 사람에게 어떤 영향을 줄지 생각한다.' },
+  { domain:'decision', text:'나는 내가 한 말이나 행동에 대해 변명하지 않고 책임을 지려 노력한다.' },
+  { domain:'decision', text:'나는 학교 규칙이나 사회적 도덕 기준에 비추어 올바른 판단을 내리려 한다.' },
+  { domain:'decision', text:'나는 디지털 도구나 AI를 사용할 때 정직하고 윤리적인 방법으로 활용한다.' }
+];
+
+const SCALE_LABELS = ['전혀 아니다','아니다','보통이다','그렇다','매우 그렇다'];
+
+/* =========================================================
+   2. 저장소 — localStorage, 안 되면 메모리로 자동 대체
+   ========================================================= */
+const store = (() => {
+  let memory = [];
+  let usable = false;
+  try {
+    localStorage.setItem('__probe__','1');
+    localStorage.removeItem('__probe__');
+    usable = true;
+  } catch (e) { usable = false; }
+
+  return {
+    persistent: usable,
+    read() {
+      if (!usable) return memory.slice();
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+      catch (e) { return []; }
+    },
+    write(list) {
+      if (!usable) { memory = list.slice(); return true; }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); return true; }
+      catch (e) { return false; }
+    }
+  };
+})();
+
+/* =========================================================
+   3. 상태
+   ========================================================= */
+let responses = Array(questions.length).fill(0);
+let scores = {};
+let records = store.read();
+let currentDetail = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* =========================================================
+   4. 설문 화면 만들기
+   ========================================================= */
+domains.forEach((domain, dIdx) => {
+  const items = questions.map((q,i)=>({q,i})).filter(o => o.q.domain === domain.key);
+  const section = document.createElement('div');
+  section.className = 'card';
+  section.style.padding = '20px';
+
+  let html =
+    '<div class="section-head">' +
+      '<span class="emoji">' + domain.icon + '</span>' +
+      '<div><h3 style="color:' + domain.color + '">' + domain.label + '</h3>' +
+      '<p class="sub">' + items.length + '개 문항</p></div>' +
+    '</div>';
+
+  items.forEach((o, n) => {
+    html +=
+      '<div class="q">' +
+        '<p><span class="num" style="color:' + domain.color + '">' + (n+1) + '.</span> ' + esc(o.q.text) + '</p>' +
+        '<div class="scale" role="group" aria-label="' + esc(o.q.text) + '">' +
+          [1,2,3,4,5].map(v =>
+            '<button class="score-btn" data-question="' + o.i + '" data-score="' + v + '" ' +
+            'aria-pressed="false" aria-label="' + v + '점, ' + SCALE_LABELS[v-1] + '">' + v + '</button>'
+          ).join('') +
+        '</div>' +
+        '<div class="scale-legend"><span>전혀 아니다</span><span>매우 그렇다</span></div>' +
+      '</div>';
+  });
+
+  section.innerHTML = html;
+  $('surveyContainer').appendChild(section);
+});
+
+$('surveyContainer').addEventListener('click', e => {
+  const btn = e.target.closest('.score-btn');
+  if (!btn) return;
+  const qi = Number(btn.dataset.question);
+  responses[qi] = Number(btn.dataset.score);
+  document.querySelectorAll('.score-btn[data-question="' + qi + '"]').forEach(b => {
+    b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+  });
+  updateProgress();
+});
+
+function updateProgress() {
+  const done = responses.filter(v => v > 0).length;
+  $('progressFill').style.width = (done / questions.length * 100) + '%';
+  $('progressText').textContent = done + ' / ' + questions.length + ' 문항 응답';
+}
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2200);
+}
+
+/* =========================================================
+   5. 채점 (1~5점 평균 → 10점 만점 환산)
+   ========================================================= */
+function calculateScores(answers) {
+  const out = {};
+  domains.forEach(d => {
+    const idx = questions.map((q,i)=>({q,i})).filter(o => o.q.domain === d.key).map(o => o.i);
+    const sum = idx.reduce((s,i) => s + answers[i], 0);
+    out[d.key] = (sum / idx.length) * 2;   // 5점 만점 평균 × 2 = 10점 만점
+  });
+  return out;
+}
+const avgOf = s => domains.reduce((a,d) => a + s[d.key], 0) / domains.length;
+
+/* =========================================================
+   6. 레이더 차트
+   ========================================================= */
+function polarToXY(cx, cy, r, deg) {
+  const rad = (deg - 90) * Math.PI / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+function drawRadar(svg, values, opts) {
+  opts = opts || {};
+  const cx = 250, cy = 235, maxR = 165, MAX = 10;
+  const angles = domains.map((_, i) => (360 / domains.length) * i);
+  let html = '';
+
+  for (let ring = 2; ring <= MAX; ring += 2) {
+    const r = ring / MAX * maxR;
+    const pts = angles.map(a => { const p = polarToXY(cx,cy,r,a); return p.x + ',' + p.y; }).join(' ');
+    html += '<polygon points="' + pts + '" fill="none" stroke="#1e2d4a" stroke-width="1"/>';
+    const lp = polarToXY(cx, cy, r, -18);
+    html += '<text x="' + (lp.x + 4) + '" y="' + lp.y + '" fill="#3a4a6a" font-size="10">' + ring + '</text>';
+  }
+  angles.forEach(a => {
+    const p = polarToXY(cx, cy, maxR, a);
+    html += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x + '" y2="' + p.y + '" stroke="#1e2d4a" stroke-width="1"/>';
+  });
+
+  if (opts.compare) {
+    const cp = domains.map((d,i) => polarToXY(cx, cy, opts.compare[d.key] / MAX * maxR, angles[i]));
+    html += '<polygon points="' + cp.map(p => p.x + ',' + p.y).join(' ') +
+            '" fill="none" stroke="#8896b3" stroke-width="1.5" stroke-dasharray="5 4"/>';
+  }
+
+  const pts = domains.map((d,i) => polarToXY(cx, cy, values[d.key] / MAX * maxR, angles[i]));
+  const gid = 'grad_' + svg.id;
+  html +=
+    '<defs><radialGradient id="' + gid + '" cx="50%" cy="50%" r="50%">' +
+    '<stop offset="0%" stop-color="#64d2ff" stop-opacity="0.32"/>' +
+    '<stop offset="100%" stop-color="#a78bfa" stop-opacity="0.12"/></radialGradient></defs>' +
+    '<polygon points="' + pts.map(p => p.x + ',' + p.y).join(' ') +
+    '" fill="url(#' + gid + ')" stroke="#64d2ff" stroke-width="2.5" stroke-linejoin="round"/>';
+
+  pts.forEach((p, i) => {
+    const d = domains[i], a = angles[i];
+    html += '<circle cx="' + p.x + '" cy="' + p.y + '" r="5" fill="' + d.color + '" stroke="#0f1729" stroke-width="2"/>';
+    const lp = polarToXY(cx, cy, maxR + 34, a);
+    const anchor = (a === 0 || Math.abs(a - 180) < 1) ? 'middle' : (a < 180 ? 'start' : 'end');
+    const dy = a === 0 ? -4 : (Math.abs(a - 180) < 1 ? 14 : 5);
+    html += '<text x="' + lp.x + '" y="' + (lp.y + dy) + '" fill="' + d.color +
+            '" font-size="13" font-weight="700" text-anchor="' + anchor + '">' +
+            d.icon + ' ' + d.short + '</text>';
+    const vp = polarToXY(cx, cy, maxR + 34, a);
+    html += '<text x="' + vp.x + '" y="' + (vp.y + dy + 15) + '" fill="#8896b3" font-size="11" text-anchor="' +
+            anchor + '">' + values[d.key].toFixed(1) + '</text>';
+  });
+
+  svg.innerHTML = html;
+}
+
+function domainBar(d, score) {
+  return '<div class="dscore">' +
+    '<div class="dscore-head"><span style="color:' + d.color + '">' + d.icon + ' ' + d.short + '</span>' +
+    '<span>' + score.toFixed(1) + '</span></div>' +
+    '<div class="track"><div style="background:' + d.color + ';width:' + (score/10*100) + '%"></div></div>' +
+  '</div>';
+}
+
+/* =========================================================
+   7. 제출 · 결과
+   ========================================================= */
+$('submitBtn').addEventListener('click', () => {
+  const name = $('studentNameInput').value.trim();
+  if (!name) {
+    $('studentNameInput').focus();
+    toast('이름을 먼저 입력하세요.');
+    return;
+  }
+  const missing = responses.findIndex(v => v === 0);
+  if (missing !== -1) {
+    toast('아직 응답하지 않은 문항이 있습니다.');
+    const el = document.querySelector('.score-btn[data-question="' + missing + '"]');
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+
+  scores = calculateScores(responses);
+  const record = {
+    id: Date.now() + '-' + Math.random().toString(36).slice(2,8),
+    student_name: name,
+    responses: responses.slice(),
+    self_aware: scores.self_aware,
+    self_mgmt: scores.self_mgmt,
+    social_aware: scores.social_aware,
+    relationship: scores.relationship,
+    decision: scores.decision,
+    average_score: avgOf(scores),
+    timestamp: new Date().toISOString()
+  };
+  records.push(record);
+  if (!store.write(records)) toast('저장 공간이 가득 찼습니다. 결과 파일로 저장하세요.');
+  showResult(record);
+});
+
+function showResult(record) {
+  scores = {};
+  domains.forEach(d => scores[d.key] = record[d.key]);
+
+  $('surveyView').classList.add('hidden');
+  $('chartView').classList.remove('hidden');
+  $('studentNameResult').textContent = record.student_name;
+
+  $('domainScores').innerHTML = domains.map(d => domainBar(d, scores[d.key])).join('');
+  drawRadar($('spiderSvg'), scores);
+
+  const list = domains.map(d => ({ ...d, score: scores[d.key] }));
+  const best = list.reduce((a,b) => a.score >= b.score ? a : b);
+  const worst = list.reduce((a,b) => a.score <= b.score ? a : b);
+  $('avgScore').textContent = avgOf(scores).toFixed(1);
+  $('strengthArea').textContent = best.short;
+  $('weakArea').textContent = worst.short;
+  $('resultNote').textContent =
+    best.label + ' 영역이 가장 튼튼합니다. ' + worst.label +
+    ' 영역은 이번 학기에 작은 목표 하나를 정해 연습해 보세요.';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+$('resetBtn').addEventListener('click', () => {
+  responses = Array(questions.length).fill(0);
+  $('studentNameInput').value = '';
+  document.querySelectorAll('.score-btn').forEach(b => b.setAttribute('aria-pressed','false'));
+  updateProgress();
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+
+$('backBtn').addEventListener('click', () => {
+  $('chartView').classList.add('hidden');
+  $('surveyView').classList.remove('hidden');
+  $('resetBtn').click();
+});
+
+$('printBtn').addEventListener('click', () => window.print());
+
+$('saveFileBtn').addEventListener('click', () => {
+  const rec = records[records.length - 1];
+  if (!rec) return;
+  download(rec.student_name + '_사회정서역량.json', JSON.stringify([rec], null, 2), 'application/json');
+});
+
+function download(filename, text, mime) {
+  const blob = new Blob([text], { type: (mime || 'text/plain') + ';charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* =========================================================
+   8. 모드 전환
+   ========================================================= */
+$('studentModeBtn').addEventListener('click', () => setMode('student'));
+$('teacherModeBtn').addEventListener('click', () => setMode('teacher'));
+
+function setMode(mode) {
+  const isTeacher = mode === 'teacher';
+  $('teacherModeBtn').setAttribute('aria-selected', String(isTeacher));
+  $('studentModeBtn').setAttribute('aria-selected', String(!isTeacher));
+  $('teacherView').classList.toggle('hidden', !isTeacher);
+  $('surveyView').classList.toggle('hidden', isTeacher);
+  $('chartView').classList.add('hidden');
+  if (isTeacher) renderTeacher();
+  window.scrollTo({ top:0 });
+}
+
+/* =========================================================
+   9. 교사 화면
+   ========================================================= */
+function classAverage() {
+  if (!records.length) return null;
+  const avg = {};
+  domains.forEach(d => avg[d.key] = records.reduce((s,r) => s + r[d.key], 0) / records.length);
+  return avg;
+}
+
+function renderTeacher() {
+  records = store.read();
+  $('studentDetail').classList.add('hidden');
+  $('teacherMain').classList.remove('hidden');
+
+  $('storageWarn').classList.toggle('hidden', store.persistent);
+  if (!store.persistent) {
+    $('storageWarn').textContent =
+      '이 환경에서는 브라우저 저장소를 쓸 수 없어 결과가 새로고침하면 사라집니다. GitHub Pages 등 실제 주소에서 열면 정상 저장됩니다.';
+  }
+
+  const has = records.length > 0;
+  $('emptyTeacher').classList.toggle('hidden', has);
+  $('teacherSummary').classList.toggle('hidden', !has);
+
+  if (!has) { $('studentsList').innerHTML = ''; $('teacherSummary').innerHTML = ''; return; }
+
+  const avg = classAverage();
+  const all = domains.map(d => ({ ...d, v: avg[d.key] }));
+  const top = all.reduce((a,b) => a.v >= b.v ? a : b);
+  const low = all.reduce((a,b) => a.v <= b.v ? a : b);
+  $('teacherSummary').innerHTML =
+    '<div class="card kpi"><div class="n">' + records.length + '</div><div class="l">제출 인원</div></div>' +
+    '<div class="card kpi"><div class="n">' + (records.reduce((s,r)=>s+r.average_score,0)/records.length).toFixed(1) + '</div><div class="l">학급 평균 (10점)</div></div>' +
+    '<div class="card kpi"><div class="n" style="color:var(--good);font-size:20px">' + top.short + '</div><div class="l">학급 강점 영역</div></div>' +
+    '<div class="card kpi"><div class="n" style="color:var(--warn);font-size:20px">' + low.short + '</div><div class="l">학급 보완 영역</div></div>';
+
+  $('studentsList').innerHTML = records
+    .map((r, i) => ({ r, i }))
+    .sort((a,b) => a.r.student_name.localeCompare(b.r.student_name, 'ko'))
+    .map(({ r, i }) =>
+      '<button class="student-card" data-idx="' + i + '">' +
+        '<h3>' + esc(r.student_name) + '</h3>' +
+        '<p class="sub">평균 <strong style="color:var(--accent)">' + r.average_score.toFixed(1) + '</strong></p>' +
+        '<div style="margin-top:8px">' +
+          domains.map(d =>
+            '<div class="mini"><span>' + d.icon + ' ' + d.short + '</span>' +
+            '<span style="color:' + d.color + ';font-weight:700">' + r[d.key].toFixed(1) + '</span></div>'
+          ).join('') +
+        '</div>' +
+      '</button>'
+    ).join('');
+}
+
+$('studentsList').addEventListener('click', e => {
+  const card = e.target.closest('.student-card');
+  if (!card) return;
+  showStudentDetail(Number(card.dataset.idx));
+});
+
+function showStudentDetail(idx) {
+  const r = records[idx];
+  if (!r) return;
+  currentDetail = idx;
+
+  $('teacherMain').classList.add('hidden');
+  $('studentDetail').classList.remove('hidden');
+
+  $('detailStudentName').textContent = r.student_name;
+  $('detailDate').textContent = new Date(r.timestamp).toLocaleString('ko-KR',
+    { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  const s = {};
+  domains.forEach(d => s[d.key] = r[d.key]);
+  drawRadar($('detailSpiderSvg'), s, { compare: classAverage() });
+
+  $('detailDomainScores').innerHTML = domains.map(d => domainBar(d, r[d.key])).join('');
+
+  const ans = Array.isArray(r.responses) ? r.responses : JSON.parse(r.responses);
+  $('detailQuestionsContent').innerHTML = questions.map((q, i) => {
+    const v = ans[i];
+    const c = v <= 2 ? '#fb923c' : v === 3 ? '#64d2ff' : '#34d399';
+    return '<div class="qrow"><p style="color:var(--muted);margin-bottom:4px">' + esc(q.text) + '</p>' +
+      '<span class="chip" style="background:' + c + '">' + v + '점 · ' + SCALE_LABELS[v-1] + '</span></div>';
+  }).join('');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+$('backToListBtn').addEventListener('click', renderTeacher);
+
+$('deleteOneBtn').addEventListener('click', () => {
+  if (currentDetail === null) return;
+  if (!confirm('이 학생의 결과를 삭제할까요? 되돌릴 수 없습니다.')) return;
+  records.splice(currentDetail, 1);
+  store.write(records);
+  currentDetail = null;
+  renderTeacher();
+});
+
+$('clearBtn').addEventListener('click', () => {
+  if (!records.length) return;
+  if (!confirm('저장된 결과 ' + records.length + '건을 모두 삭제할까요? 되돌릴 수 없습니다.')) return;
+  records = [];
+  store.write(records);
+  renderTeacher();
+});
+
+/* CSV 내려받기 (엑셀 한글 깨짐 방지 BOM 포함) */
+$('exportCsvBtn').addEventListener('click', () => {
+  if (!records.length) { toast('내려받을 결과가 없습니다.'); return; }
+  const head = ['이름','제출일시', ...domains.map(d => d.label), '평균',
+                ...questions.map((q,i) => '문' + (i+1))];
+  const rows = records.map(r => {
+    const ans = Array.isArray(r.responses) ? r.responses : JSON.parse(r.responses);
+    return [r.student_name, new Date(r.timestamp).toLocaleString('ko-KR'),
+            ...domains.map(d => r[d.key].toFixed(2)), r.average_score.toFixed(2), ...ans];
+  });
+  const csv = [head, ...rows]
+    .map(row => row.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(','))
+    .join('\r\n');
+  download('사회정서역량_결과.csv', '\uFEFF' + csv, 'text/csv');
+});
+
+$('exportJsonBtn').addEventListener('click', () => {
+  if (!records.length) { toast('저장할 결과가 없습니다.'); return; }
+  download('사회정서역량_백업.json', JSON.stringify(records, null, 2), 'application/json');
+});
+
+$('importBtn').addEventListener('click', () => $('importInput').click());
+
+$('importInput').addEventListener('change', async e => {
+  const files = Array.from(e.target.files || []);
+  let added = 0;
+  for (const file of files) {
+    try {
+      const parsed = JSON.parse(await file.text());
+      const list = Array.isArray(parsed) ? parsed : [parsed];
+      list.forEach(r => {
+        if (!r || !r.student_name || typeof r.average_score !== 'number') return;
+        const dup = records.some(x => x.student_name === r.student_name && x.timestamp === r.timestamp);
+        if (!dup) { records.push(r); added++; }
+      });
+    } catch (err) { /* 형식이 맞지 않는 파일은 건너뜀 */ }
+  }
+  store.write(records);
+  e.target.value = '';
+  renderTeacher();
+  toast(added ? added + '건을 불러왔습니다.' : '불러올 수 있는 결과가 없습니다.');
+});
+
+/* =========================================================
+   10. 시작
+   ========================================================= */
+updateProgress();
+</script>
+</body>
+</html>
